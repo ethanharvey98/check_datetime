@@ -1,4 +1,4 @@
-# complie_student
+# compile_student
 
 ### Tool to automatically check date of student submitted files for CS15
 
