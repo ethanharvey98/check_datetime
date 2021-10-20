@@ -1,8 +1,8 @@
 # Complie_student
 
-### Tool to automatically check date of student submitted files for Comp 15.
+### Tool to automatically check date of student submitted files for CS15
 
-    usage: compile_studn -d DUEDATETIME -u UTLN
+    usage: compile_studn [-d DUEDATETIME] [-u UTLN]
 
     optional arguments:
       --duedatetime DUEDATETIME  Overrides assignement due datetime
