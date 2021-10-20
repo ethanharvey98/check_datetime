@@ -1,11 +1,12 @@
-# compile_student
+# check_datetime
 
 ### Tool to automatically check datetime of students' submitted files for CS15
 
-    usage: compile_studn [-d DUEDATETIME] [-u UTLN]
+    usage: check_datetime [-d DUEDATE] [-t DUETIME] [-u UTLN]
 
     optional arguments:
-      --duedatetime DUEDATETIME  Overrides assignement due datetime
-      --utln UTLN                Overrides student enviroment
+      --duedate DUEDATE     Overrides assignement due date
+      --duetime DUETIME     Overrides assignement due time
+      --utln UTLN           Overrides student enviroment
       
 Essentially, the program does the following
