@@ -9,4 +9,4 @@
       --duetime DUETIME     Overrides assignement due time
       --utln UTLN           Overrides student enviroment
       
-Essentially, the program does the following
+Essentially, the program compares the timestamps of the students' submitted files with the due date and time in assignments.conf
