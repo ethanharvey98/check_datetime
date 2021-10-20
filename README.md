@@ -1,6 +1,6 @@
 # compile_student
 
-### Tool to automatically check date of student submitted files for CS15
+### Tool to automatically check datetime of students' submitted files for CS15
 
     usage: compile_studn [-d DUEDATETIME] [-u UTLN]
 
