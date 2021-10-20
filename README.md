@@ -1,8 +1,8 @@
-# check_datetime
+# check_timestamp
 
-### Tool to automatically check datetime of students' submitted files for CS15
+### Tool to automatically check the timestamp of students' submitted files for CS15
 
-    usage: check_datetime [-d DUEDATE & -t DUETIME] [-u UTLN]
+    usage: check_timestamp [-d DUEDATE & -t DUETIME] [-u UTLN]
 
     optional arguments:
       --duedate DUEDATE     Overrides assignement due date
