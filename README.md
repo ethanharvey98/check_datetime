@@ -10,4 +10,4 @@
       --duetime DUETIME     Time in form of HH:MM e.g. 15:00
       --utln UTLN           Overrides student enviroment
       
-Essentially, the program compares the timestamps of the students' submitted files with the due date and time in assignments.conf
+Essentially, the program compares the timestamps of the students' submitted files with the duedate and duetime in assignments.conf
