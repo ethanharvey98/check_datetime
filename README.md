@@ -5,9 +5,9 @@
     usage: check_timestamp [-h] [-d DUEDATE & -t DUETIME] [-u UTLN]
 
     optional arguments:
-      -h, --help            Show this help message and exit
-      --duedate DUEDATE     Date in form of MM/DD e.g. 12/25
-      --duetime DUETIME     Time in form of HH:MM e.g. 15:00
-      --utln UTLN           Overrides student enviroment
+      -h, --help                Show this help message and exit
+      -d, --duedate DUEDATE     Date in form of MM/DD e.g. 12/25
+      -t, --duetime DUETIME     Time in form of HH:MM e.g. 15:00
+      -u, --utln UTLN           Overrides student enviroment
       
 Essentially, the program compares the timestamps of the students' submitted files with the duedate and duetime in assignments.conf
