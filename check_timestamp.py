@@ -4,55 +4,63 @@ import re
 import sys
 import argparse
 
+"""
+This function takes an ASSIGNMENT, CURRENT_DIRECTORY, and GRADING_ROOT
+and returns the assignements duedate and duetime from assignments.conf
+"""
+def parse_assignments(ASSIGNMENT, CURRENT_DIRECTORY, GRADING_ROOT):
+    # open assignments.conf
+    assignments_file = open(GRADING_ROOT+"/assignments.conf", "r")
+    lines = assignments_file.readlines()
+    assignments_file.close()
+    # parse assignments.conf
+    continued_line = False
+    assignment_to_add = ""
+    assignment_string_array = []
+    for line in lines:
+        if not ((re.search("^#", line)) or (re.search("^\n", line))):
+            if (re.search("\\\\\\n", line)):
+                continued_line = True
+                assignment_to_add = assignment_to_add + line
+            else:
+                continued_line = False
+                assignment_to_add = assignment_to_add + line
+            if not (continued_line):
+                assignment_string_array.append(assignment_to_add)
+                assignment_to_add = ""
+    # create a dictionary for each assignment
+    assignment_dictionary_array = []
+    for assignment in assignment_string_array:
+        assignment = assignment.replace("\\", " ")
+        param_dictionary = {}
+        for param in assignment.split():
+            param_dictionary[param.split("=")[0]]=param.split("=")[1]
+        assignment_dictionary_array.append(param_dictionary)
+    # find the assignment duedate
+    assignment_duedate = ""
+    assignment_duetime = ""
+    for assignment_dictionary in assignment_dictionary_array:
+        if assignment_dictionary["assign"] == ASSIGNMENT:
+            assignment_duedate = assignment_dictionary["duedate"]
+            assignment_duetime = assignment_dictionary["duetime"]
+    if (assignment_duedate == ""):
+        print("Error: Assignment duedate not found")
+    if (assignment_duetime == ""):
+        print("Error: Assignment duetime not found")
+    return assignment_duedate, assignment_duetime
+
 def check_timestamp(duedate, duetime, path):
-    
+    # initialize ASSIGNMENT, CURRENT_DIRECTORY, and GRADING_ROOT
     ASSIGNMENT = os.environ.get("HW")
     if (path == None): CURRENT_DIRECTORY = os.getcwd()
     else: CURRENT_DIRECTORY = path
     GRADING_ROOT = os.environ.get("GRADING_ROOT")
-    
+    # initialize return value
     return_value = 0
     files = os.listdir(CURRENT_DIRECTORY)
-    
-    # If no custom duedate and duetime were given
+    # if no custom duedate and duetime were given
     if (duedate == None and duetime == None):
-        file1 = open(GRADING_ROOT+"/assignments.conf", "r")
-        lines = file1.readlines()
-        
-        continued_line = False
-        assignment_to_add = ""
-        assignment_string_array = []
-        # parse assignments.conf
-        for line in lines:
-            if not ((re.search("^#", line)) or (re.search("^\n", line))):
-                if (re.search("\\\\\\n", line)):
-                    continued_line = True
-                    assignment_to_add = assignment_to_add + line
-                else:
-                    continued_line = False
-                    assignment_to_add = assignment_to_add + line
-                if not (continued_line):
-                    assignment_string_array.append(assignment_to_add)
-                    assignment_to_add = ""
-        # create a dictionary for each assignment
-        assignment_dictionary_array = []
-        for assignment in assignment_string_array:
-            assignment = assignment.replace("\\", " ")
-            param_dictionary = {}
-            for param in assignment.split():
-                param_dictionary[param.split("=")[0]]=param.split("=")[1]
-            assignment_dictionary_array.append(param_dictionary)
-        # find the assignment duedate
-        assignment_duedate = ""
-        assignment_duetime = ""
-        for assignment in assignment_dictionary_array:
-            if assignment["assign"] == ASSIGNMENT:
-                assignment_duedate = assignment["duedate"]
-                assignment_duetime = assignment["duetime"]
-        if (assignment_duedate == ""):
-            print("Error: Assignment duedate not found")
-        if (assignment_duetime == ""):
-            print("Error: Assignment duetime not found")
+        assignment_duedate, assignment_duetime = parse_assignments(ASSIGNMENT, CURRENT_DIRECTORY, GRADING_ROOT)
     else:
         assignment_duedate = duedate
         assignment_duetime = duetime
@@ -96,36 +104,35 @@ def check_timestamp(duedate, duetime, path):
     return return_value
 
 def main():
-
+    # python library argparse
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-d',
-        '--date',
-        dest='date',
-        required='--time' in sys.argv,
-        help='Date in form of MM/DD e.g. 12/25'
+        "-d",
+        "--date",
+        dest="date",
+        required="--time" in sys.argv,
+        help="Date in form of MM/DD e.g. 12/25"
     )
     parser.add_argument(
-        '-t',
-        '--time',
-        dest='time',
-        required='--date' in sys.argv,
-        help='Time in form of HH:MM e.g. 15:00'
+        "-t",
+        "--time",
+        dest="time",
+        required="--date" in sys.argv,
+        help="Time in form of HH:MM e.g. 15:00"
     )
     parser.add_argument(
-        '-p',
-        '--path',
-        dest='path',
-        help='Overrides student enviroment'
+        "-p",
+        "--path",
+        dest="path",
+        help="Overrides student enviroment"
     )
     args = parser.parse_args()
-            
+    # if date or time is given both are required
     if (args.date == None and args.time) or (args.date and args.time == None):
-        print('\nusage: check_timestamp.py [-h] [-d DATE] [-t TIME] [-p PATH]')
+        print("\nusage: check_timestamp.py [-h] [-d DATE] [-t TIME] [-p PATH]")
         sys.exit(2)
-        
     check_timestamp(args.date, args.time, args.path)
 
 if __name__ == "__main__":
-    
+    # run main
     main()
