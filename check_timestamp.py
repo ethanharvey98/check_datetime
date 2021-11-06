@@ -5,10 +5,10 @@ import sys
 import argparse
 
 """
-This function takes an ASSIGNMENT, CURRENT_DIRECTORY, and GRADING_ROOT
-and returns the assignements duedate and duetime from assignments.conf
+This function takes an assignement and grading_root and returns the 
+assignements duedate and duetime from assignments.conf
 """
-def parse_assignments(ASSIGNMENT, CURRENT_DIRECTORY, GRADING_ROOT):
+def parse_assignments(assign, GRADING_ROOT):
     # open assignments.conf
     assignments_file = open(GRADING_ROOT+"/assignments.conf", "r")
     lines = assignments_file.readlines()
@@ -37,75 +37,87 @@ def parse_assignments(ASSIGNMENT, CURRENT_DIRECTORY, GRADING_ROOT):
             param_dictionary[param.split("=")[0]]=param.split("=")[1]
         assignment_dictionary_array.append(param_dictionary)
     # find the assignment duedate
-    assignment_duedate = ""
-    assignment_duetime = ""
+    assignment_duedate = None
+    assignment_duetime = None
+    assignment_found = False
     for assignment_dictionary in assignment_dictionary_array:
-        if assignment_dictionary["assign"] == ASSIGNMENT:
-            assignment_duedate = assignment_dictionary["duedate"]
-            assignment_duetime = assignment_dictionary["duetime"]
-    if (assignment_duedate == ""):
-        print("Error: Assignment duedate not found")
-    if (assignment_duetime == ""):
-        print("Error: Assignment duetime not found")
+        if assignment_dictionary["assign"] == assign:
+            assignment_found = True
+            try: assignment_duedate = assignment_dictionary["duedate"]
+            except: print("Error: Assignment duedate not found")
+            try: assignment_duetime = assignment_dictionary["duetime"]
+            except: print("Error: Assignment duetime not found")
+    # print errors if assignment not found
+    if not assignment_found: print("Error: Assignment not found")
+    # return assignment duedate and duetime
     return assignment_duedate, assignment_duetime
 
-def check_timestamp(duedate, duetime, path):
-    # initialize ASSIGNMENT, CURRENT_DIRECTORY, and GRADING_ROOT
-    ASSIGNMENT = os.environ.get("HW")
+def check_timestamp(assign, duedate, duetime, path):
+    # initialize CURRENT_DIRECTORY and GRADING_ROOT
     if (path == None): CURRENT_DIRECTORY = os.getcwd()
     else: CURRENT_DIRECTORY = path
-    GRADING_ROOT = os.environ.get("GRADING_ROOT")
+    #GRADING_ROOT = os.environ.get("GRADING_ROOT")
+    GRADING_ROOT = "/comp/15/grading"
+
     # initialize return value
     return_value = 0
     files = os.listdir(CURRENT_DIRECTORY)
     # if no custom duedate and duetime were given
-    if (duedate == None and duetime == None):
-        assignment_duedate, assignment_duetime = parse_assignments(ASSIGNMENT, CURRENT_DIRECTORY, GRADING_ROOT)
+    if (duedate == None) and (duetime == None):
+        assignment_duedate, assignment_duetime = parse_assignments(assign, GRADING_ROOT)
     else:
         assignment_duedate = duedate
         assignment_duetime = duetime
-    # compare student's files datetime to duedatetime
-    year = datetime.date.today().year
-    if (len(assignment_duedate.split("/")) == 2):
-        assignment_datetime = datetime.datetime(
-            year,
-            int(assignment_duedate.split("/")[0]),
-            int(assignment_duedate.split("/")[1]),
-            int(assignment_duetime.split(":")[0]),
-            int(assignment_duetime.split(":")[1])
-            )
-        # add 48 hours if duedate and duetime were not specified
-        if (duedate == None and duetime == None):
-            assignment_datetime = assignment_datetime + datetime.timedelta(days=2)
-        for file in files:
-            # ignore hidden files
-            if not (re.search("^\.", file)):
-                if (datetime.datetime.fromtimestamp(os.path.getmtime(CURRENT_DIRECTORY+file))>assignment_datetime):
-                    return_value = 1
-                    print("{} was modified after assignment deadline.".format(file))
-    elif (len(assignment_duedate.split("/")) == 3):
-        assignment_datetime = datetime.datetime(
-            int(assignment_duedate.split("/")[2]),
-            int(assignment_duedate.split("/")[0]),
-            int(assignment_duedate.split("/")[1]),
-            int(assignment_duetime.split(":")[0]),
-            int(assignment_duetime.split(":")[1])
-            )
-        # add 48 hours if duedate and duetime were not specified
-        if (duedate == None and duetime == None):
-            assignment_datetime = assignment_datetime + datetime.timedelta(days=2)
-        for file in files:
-            # ignore hidden files
-            if not (re.search("^\.", file)):
-                if (datetime.datetime.fromtimestamp(os.path.getmtime(CURRENT_DIRECTORY+file))>assignment_datetime):
-                    return_value = 1
-                    print("{} was modified after assignment deadline.".format(file))
+    if (not assignment_duedate == None) and (not assignment_duetime == None):
+        # compare student's files datetime to duedatetime
+        year = datetime.date.today().year
+        if (len(assignment_duedate.split("/")) == 2):
+            assignment_datetime = datetime.datetime(
+                year,
+                int(assignment_duedate.split("/")[0]),
+                int(assignment_duedate.split("/")[1]),
+                int(assignment_duetime.split(":")[0]),
+                int(assignment_duetime.split(":")[1])
+                )
+            # add 48 hours if duedate and duetime were not specified
+            if (duedate == None and duetime == None):
+                assignment_datetime = assignment_datetime + datetime.timedelta(days=2)
+            for file in files:
+                # ignore hidden files
+                if not (re.search("^\.", file)):
+                    if (datetime.datetime.fromtimestamp(os.path.getmtime(CURRENT_DIRECTORY+"/"+file))>assignment_datetime):
+                        return_value = 1
+                        print("{} was modified after assignment deadline.".format(file))
+        elif (len(assignment_duedate.split("/")) == 3):
+            assignment_datetime = datetime.datetime(
+                int(assignment_duedate.split("/")[2]),
+                int(assignment_duedate.split("/")[0]),
+                int(assignment_duedate.split("/")[1]),
+                int(assignment_duetime.split(":")[0]),
+                int(assignment_duetime.split(":")[1])
+                )
+            # add 48 hours if duedate and duetime were not specified
+            if (duedate == None and duetime == None):
+                assignment_datetime = assignment_datetime + datetime.timedelta(days=2)
+            for file in files:
+                # ignore hidden files
+                if not (re.search("^\.", file)):
+                    if (datetime.datetime.fromtimestamp(os.path.getmtime(CURRENT_DIRECTORY+"/"+file))>assignment_datetime):
+                        return_value = 1
+                        print("{} was modified after assignment deadline.".format(file))
 
     return return_value
 
 def main():
     # python library argparse
     parser = argparse.ArgumentParser()
+    requiredArgs = parser.add_argument_group('required arguments')
+    requiredArgs.add_argument(
+        "-a",
+        dest="assign",
+        required=True,
+        help="Assignment name e.g. hw1"
+    )
     parser.add_argument(
         "-d",
         "--date",
@@ -129,9 +141,9 @@ def main():
     args = parser.parse_args()
     # if date or time is given both are required
     if (args.date == None and args.time) or (args.date and args.time == None):
-        print("\nusage: check_timestamp.py [-h] [-d DATE] [-t TIME] [-p PATH]")
+        print("\nusage: check_timestamp.py [-h] -a ASSIGN [-d DATE] [-t TIME] [-p PATH]")
         sys.exit(2)
-    check_timestamp(args.date, args.time, args.path)
+    check_timestamp(args.assign, args.date, args.time, args.path)
 
 if __name__ == "__main__":
     # run main
